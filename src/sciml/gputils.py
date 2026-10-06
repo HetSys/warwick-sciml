@@ -26,9 +26,39 @@ def _show(obj):
         print(obj)
 
 
+def gp_params_table(params, negative_mll, grad_negative_mll=None):
+    """
+    Table of GP hyperparameters and gradients of the negative log marginal likelihood.
+
+    Array-valued parameters are expanded to one row per component. All values are
+    plain Python floats, so the table displays correctly in marimo and Jupyter.
+    """
+    if grad_negative_mll is None:
+        grad_negative_mll = grad(negative_mll)
+
+    def params_to_dict(params):
+        D = {}
+        for k, v in params.items():
+            v = np.asarray(v, dtype=float)
+            if v.size == 1:
+                D[k] = float(v.reshape(()))
+            else:
+                for j, v2 in enumerate(v.ravel()):
+                    D[f"{k}[{j}]"] = float(v2)
+        return D
+
+    return pd.DataFrame.from_dict(
+        {
+            "parameter": params_to_dict(params),
+            "gradient": params_to_dict(grad_negative_mll(params)),
+        }
+    )
+
+
 def gp_print(params, negative_mll, grad_negative_mll=None):
     """
-    Print the tingp Gaussian Process with parameter set `params`.
+    Display the parameters of a tinygp Gaussian process and the gradients of
+    the negative log marginal likelihood with respect to them.
 
     Arguments:
 
@@ -39,32 +69,8 @@ def gp_print(params, negative_mll, grad_negative_mll=None):
     grad_negative_mll: func
         Gradient of negative_mll. If not present, computed with `jax.grad()`.
     """
-    if grad_negative_mll is None:
-        grad_negative_mll = grad(negative_mll)
-    _show(f"<b>Negative log marginal likelihood:</b> {negative_mll(params):.3f}")
-
-    def params_to_dict(params):
-        D = {}
-        for k, v in params.items():
-            if isinstance(v, jnp.ndarray):
-                if v.shape == ():
-                    v = float(v)
-                    D[k] = v
-                elif v.shape == (1,):
-                    D[k] = v[0]
-                else:
-                    for j, v2 in enumerate(v):
-                        D[f"{k}[{j}]"] = v2
-            else:
-                D[k] = v
-        return D
-
-    df = pd.DataFrame.from_dict(
-        {
-            "parameter": params_to_dict(params),
-            "gradient": params_to_dict(grad_negative_mll(params)),
-        }
-    )
+    _show(f"<b>Negative log marginal likelihood:</b> {float(negative_mll(params)):.3f}")
+    df = gp_params_table(params, negative_mll, grad_negative_mll)
     _show(f"<b>Number of parameters:</b> {len(df)}")
     _show(df)
 

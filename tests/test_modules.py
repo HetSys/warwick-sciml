@@ -68,6 +68,27 @@ def test_gp_fit_runs():
     assert float(negative_mll(learned)) < float(negative_mll(params))
 
 
+def test_gp_params_table_has_plain_floats():
+    """Regression test: JAX arrays in the table broke marimo's table widget."""
+    pytest.importorskip("tinygp")
+    import jax.numpy as jnp
+    from tinygp import GaussianProcess, kernels
+
+    from sciml.gputils import gp_params_table
+
+    X = jnp.linspace(0, 5, 10)
+    y = jnp.sin(X)
+
+    def negative_mll(params):
+        k = params["variance"] * kernels.ExpSquared(params["lengthscale"][0])
+        return -GaussianProcess(k, X, diag=1e-2).log_probability(y)
+
+    params = {"variance": jnp.array(1.0), "lengthscale": jnp.array([1.0, 2.0])}
+    df = gp_params_table(params, negative_mll)
+    assert list(df.index) == ["variance", "lengthscale[0]", "lengthscale[1]"]
+    assert all(str(dt) == "float64" for dt in df.dtypes), df.dtypes  # not object columns of JAX arrays
+
+
 def test_atomistic_vacancy_formation_energy():
     pytest.importorskip("atomistica")
     from sciml.atomistic import Tersoff_parameter_values, vacancy_formation_energy

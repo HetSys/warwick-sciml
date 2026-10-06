@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "warwick-sciml"
-version = "2026.1.0"
+version = "2026.1.1"
 description = "Support modules for the Warwick PX914/ES98E Predictive Modelling, UQ and Scientific Machine Learning module"
 readme = "README.md"
 requires-python = ">=3.11"

@@ -13,4 +13,4 @@ Submodules (import them explicitly, e.g. ``from sciml.blr import design_matrix``
 - ``sciml.progress``      tqdm wrappers suited to lecture notebooks
 """
 
-__version__ = "2026.1.0"
+__version__ = "2026.1.1"
