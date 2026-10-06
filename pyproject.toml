@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "warwick-sciml"
+version = "2026.1.0"
+description = "Support modules for the Warwick PX914/ES98E Predictive Modelling, UQ and Scientific Machine Learning module"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "James Kermode" }]
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "pandas",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+# Gaussian process utilities (sciml.gputils)
+gp = ["jax", "tinygp"]
+# Atomistic examples (sciml.atomistic, sciml.tersoff_jax)
+atomistic = ["ase", "atomistica", "matscipy", "jax"]
+test = ["pytest", "warwick-sciml[gp,atomistic]"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sciml"]
+
+[tool.pytest.ini_options]
+filterwarnings = ["ignore::DeprecationWarning"]
